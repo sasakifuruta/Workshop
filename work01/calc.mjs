@@ -146,7 +146,7 @@ class Calculator {
     }
 
     // ===============================================================
-    // 構文解析
+    // 構文解析:トークンから演算子の優先度に基づく式（AST）を構築
     // ===============================================================
     parse(tokens) {
         this.tokens = tokens; // パーサ用に保持
@@ -161,6 +161,15 @@ class Calculator {
     /**
      * 演算子の優先度を考慮した式解析
      * @param {number} minPrecedence - 現在処理中の最小優先度
+     * 入力トークンが　2  +  3  *  4  -  5　の場合
+     * 出力AST例： (2+(3*4))-5
+     * Binary(-)
+     * ├── Binary(+)
+     * │   ├── Number(2)
+     * │   └── Binary(*)
+     * │       ├── Number(3)
+     * │       └── Number(4)
+     * └── Number(5)
      */
     parseExpression(minPrecedence = 0) {
         // まず左辺を解析
