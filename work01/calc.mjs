@@ -43,9 +43,9 @@ class Calculator {
     // ===============================================================
     // メイン処理：電卓実行
     // ===============================================================
-    run() {
+    run(expr) {
         try {
-            const expr = this.getInput();      // コマンドライン引数から式を取得
+            if (!expr) expr = this.getInput();     // コマンドライン引数から式を取得
             const tokens = this.tokenize(expr); // 式をトークン化
             const ast = this.parse(tokens);     // トークンからASTを構築
             const result = this.evaluate(ast);  // ASTを評価して結果を取得
@@ -60,6 +60,16 @@ class Calculator {
     // ===============================================================
     // 入力取得と検証
     // ===============================================================
+    /** NOTE:
+     * [CLI引数]  →  [process.argv]
+     *                    ↓ slice(2)
+     *            ["2","+","3","*","4"]
+     *                    ↓ join(" ")
+     *             "2 + 3 * 4"
+     *                    ↓ trim()
+     *              "2 + 3 * 4" 
+     *              → return
+     */
     getInput() {
         // コマンドライン引数を連結して1つの式にする
         const expr = process.argv.slice(2).join(" ");
@@ -73,6 +83,18 @@ class Calculator {
     // ===============================================================
     // 式をトークンに分解
     // ===============================================================
+    /**
+     * 
+     * @param {*} expr 例: "2 + 3 * 4 ""
+     * @returns  
+     * 例: [
+     *      {type:"number", value:2}, 
+     *      {type:"operator", value:"+"},
+     *      {type:"number", value:3},
+     *      {type:"operator", value:"*"},
+     *      {type:"number", value:4}
+     *      ]
+     */
     tokenize(expr) {
         // サポート外文字のチェック
         for (const pattern of this.UNSUPPORTED_PATTERNS) {
@@ -171,7 +193,7 @@ class Calculator {
      * │       └── Number(4)
      * └── Number(5)
      */
-    parseExpression(minPrecedence = 0) {
+    #parseExpression(minPrecedence = 0) {
         // まず左辺を解析
         let left = this.parseFactor();
 
@@ -197,7 +219,7 @@ class Calculator {
         return left;
     }
 
-    parseFactor() {
+    #parseFactor() {
         // 単項演算子 +/-
         if (this.match("+") || this.match("-")) {
             const operator = this.previous().value;
@@ -277,7 +299,7 @@ class Calculator {
     // ===============================================================
     // ユーティリティ関数
     // ===============================================================
-    match(value) {
+    #match(value) {
         // 現在のトークンが指定値なら進める
         const token = this.peek();
         if (token && token.value === value) {
@@ -287,11 +309,11 @@ class Calculator {
         return false;
     }
 
-    peek() { return this.tokens[this.pos]; }          // 現在トークン取得
-    previous() { return this.tokens[this.pos - 1]; } // 1つ前のトークン取得
-    advance() { this.pos++; }                         // トークン位置を進める
+    #peek() { return this.tokens[this.pos]; }          // 現在トークン取得
+    #previous() { return this.tokens[this.pos - 1]; } // 1つ前のトークン取得
+    #advance() { this.pos++; }                         // トークン位置を進める
 
-    fail(message, code) {
+    #fail(message, code) {
         const err = new Error(message);
         err.code = code;
         throw err; // 例外をスロー
