@@ -1,4 +1,4 @@
-import type { AuthInfo } from '../lib/parseAuthLine.ts';
+import type { AuthInfo } from '../lib/parse_auth_line.ts';
 import { padRight, splitUserMethodKey, getTopN } from '../lib/util.ts';
 
 

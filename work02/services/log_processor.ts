@@ -1,8 +1,8 @@
 import * as fs from 'fs';
 import * as zlib from 'zlib';
-import { parseAuthLine } from '../lib/parseAuthLine.ts';
-import type { Stats } from './authStats.ts';
-import { updateStats } from './authStats.ts';
+import { parseAuthLine } from '../lib/parse_auth_line.ts';
+import type { Stats } from './auth_stats.ts';
+import { updateStats } from './auth_stats.ts';
 import { AppError } from '../lib/error.ts';
 
 

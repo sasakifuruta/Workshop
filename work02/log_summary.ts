@@ -10,9 +10,9 @@ import {
     printAuthSuccesses,
     printAuthFailures,
     printAuthFailuresByIp 
-} from './services/authStats.ts';
-import { processLogFile } from './services/logProcessor.ts';
-import type { Stats } from './services/authStats.ts';
+} from './services/auth_stats.ts';
+import { processLogFile } from './services/log_processor.ts';
+import type { Stats } from './services/auth_stats.ts';
 import { printPerformance } from './lib/util.ts';
 
 
