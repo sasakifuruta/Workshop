@@ -6,13 +6,12 @@ import { updateStats } from './auth_stats.ts';
 import { AppError } from '../lib/error.ts';
 
 
-declare class Buffer {
-    toString(encoding?: string): string;
-}
-
-
+// =============================
+// ログファイル処理モジュール
+// =============================
 /**
- * gzip圧縮されたログファイルをストリームで読みながら1行ずつ処理
+ * gzip 圧縮されたログファイルをストリーミングで読み込み、
+ * 解凍 → 行単位パース → 統計更新
  */
 export function processLogFile(logFile: string, stats: Stats): Promise<void> {
     return new Promise<void>((resolve, reject) => {
