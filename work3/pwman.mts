@@ -1,5 +1,5 @@
 // pwman.mts
-import { ARGS, COMMAND } from './src/config.mts';
+import { COMMAND } from './src/config.mts';
 import { openDb, ensureDbExists, SCHEMA_SQL } from './src/db.mts';
 import {
   verifyMasterPassword,
@@ -107,7 +107,7 @@ async function cmdGet(args: string[]): Promise<void> {
   const key = deriveKey(masterPw, salt);
   const decrypted = decrypt(row.password, key);
 
-  exitWith(ExitCode.OK, `${service}, ${username}, password: ${decrypted}`);
+  exitWith(ExitCode.OK, `${service}, ${username}, ${decrypted}`);
 }
 
 /**
