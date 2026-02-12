@@ -490,6 +490,7 @@ Total credentials: 5
 | No. | 機能（コマンド） | 種別 | シナリオ    | 手順            | 期待結果   | 観点   |
 | --- | -------- | -- | ------- | ------------- | ------ | ---- |
 | 4   | init     | 異常 | 入力中断    | PW入力中Ctrl+C   | DB未作成  | 中断耐性 |
+※以下は処理が一瞬で終了したため実行できていません。
 | 29  | export   | 異常 | 途中強制終了  | export中Ctrl+C | CSV未生成 | 原子性  |
 | 30  | export   | 異常 | 強制kill  | SIGKILL       | CSV未生成 | 耐障害性 |
 | 37  | import   | 異常 | 途中中断    | import中Ctrl+C | DB未変更  | 原子性  |
@@ -497,5 +498,71 @@ Total credentials: 5
 | 48  | 共通       | 異常 | 標準入力EOF | Ctrl+D        | エラー    | 入力耐性 |
 
 
-<TODO>
-- DBアクセス部分を小さなtry-catchで囲む
+## 12. その他メモ
+- init は強制killであっても再実行を許さないか
+- 「壊れたDB」はどう検知するか
+- マスターパスワード未登録状態をどう扱うか
+
+**▪️初期化済とは**：
+- masterテーブルが存在する
+- レコードが1件だけ存在する
+  
+**▪️DBが壊れているかを検知する方法**
+1. 物理破損（SQLiteファイル破損）
+→起動時にPRAGMA integrity_check;
+
+1. スキーマ不整合
+→PRAGMA table_info(master)で構造確認。
+
+1. 論理的不整合（masterがない、複数ある等）
+→SELECT COUNT(*) FROM master;
+0件 → 未初期化
+1件 → 正常
+2件以上 → 壊れている
+
+**▪️マスターパスワード未登録状態の場合は**
+- masterが0件 → 未初期化状態 →initのみ許可
+- それ以外のコマンドは：「DB未初期化」
+
+**▪️起動時チェック**：
+1. DB存在？
+なし → 未初期化
+
+2. SQLiteファイル破損チェック（integrity_check） OK？
+NO → 異常終了
+
+3. masterレコード数
+0 → 未初期化
+1 → 正常
+2以上 → 異常終了
+
+**▪️initの仕様**：
+- 未初期化状態でのみ実行可能
+- トランザクション必須
+- 原子的に作成
+
+**▪️DB状態定義**
+- NO_DB：DB存在なし
+- UNINITIALIZED：masterと- credentialsテーブルが両方無し
+- READY : masterとcredentialsテーブルが両方存在
+- CORRUPTED：
+  - SQLiteファイル破損
+  - masterレコード数が複数
+
+
+**▪️状態遷移**
+```mermaid
+stateDiagram-v2
+    [*] --> NO_DB
+
+    NO_DB --> UNINITIALIZED : DBファイル作成
+    UNINITIALIZED --> READY : init成功（master=1件）
+
+    READY --> CORRUPTED : DB破損 / テーブル不整合
+    UNINITIALIZED --> CORRUPTED : 途中失敗 / 片方テーブルのみ存在
+
+    CORRUPTED --> NO_DB : DB削除
+    CORRUPTED --> UNINITIALIZED : 修復成功（整合性回復）
+
+    READY --> READY : 通常操作（add/get/del）
+  ```

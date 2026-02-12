@@ -4,9 +4,9 @@ import { Messages } from './messages.mts';
 
 
 /**
- * ========================
  * 対話式パスワード入力
- * ========================
+ * @param prompt 
+ * @returns 
  */
 export async function askPassword(prompt: string): Promise<string> {
   return new Promise((resolve) => {
@@ -49,6 +49,10 @@ export async function askPassword(prompt: string): Promise<string> {
   });
 }
 
+/**
+ * 制御文字の検証
+ * @param values 
+ */
 export function validateNoControlChars(...values: string[]): void {
   const CONTROL_CHAR_RE = /[\t\r\n]/;
   for (const v of values) {
@@ -56,6 +60,12 @@ export function validateNoControlChars(...values: string[]): void {
   }
 }
 
+/**
+ * オプション値の取得
+ * @param args 
+ * @param name 
+ * @returns 
+ */
 export function getOption(args: string[], name: string): string | undefined {
   const idx = args.indexOf(name);
   if (idx !== -1 && args[idx + 1]) return args[idx + 1];

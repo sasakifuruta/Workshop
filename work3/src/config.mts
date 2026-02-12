@@ -7,7 +7,6 @@ import process from 'node:process';
  * 定数・パス設定
  * ========================
  */
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 

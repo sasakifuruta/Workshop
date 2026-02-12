@@ -17,6 +17,9 @@ export function openDb(): DatabaseSync {
   return dbInstance;
 }
 
+/**
+ * DBファイルの存在を確認する
+ */
 export function ensureDbExists(): void {
   if (!fs.existsSync(DB_PATH)) {
     exitWith(ExitCode.IO_DB_ERROR, Messages.errors.dbNotInitialized);
@@ -30,14 +33,14 @@ export function ensureDbExists(): void {
  * ========================
  */
 export const SCHEMA_SQL = `
-CREATE TABLE credentials (
+CREATE TABLE IF NOT EXISTS credentials (
   service TEXT NOT NULL,
   username TEXT NOT NULL,
   password TEXT NOT NULL,
   PRIMARY KEY (service, username)
 );
 
-CREATE TABLE master (
+CREATE TABLE IF NOT EXISTS master (
   id INTEGER PRIMARY KEY CHECK (id = 1),
   password_hash TEXT NOT NULL,
   salt TEXT NOT NULL

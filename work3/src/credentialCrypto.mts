@@ -4,12 +4,12 @@ const ITERATIONS = 100_000;
 const KEY_LEN = 32; // 256bit
 const DIGEST = 'sha256';
 
-// テスト用カウンタ（プロセス内グローバル）
-let encryptCounter = 0;
-
 
 /**
  * master password から暗号鍵を導出
+ * @param masterPw 
+ * @param salt 
+ * @returns 
  */
 export function deriveKey(masterPw: string, salt: string): Buffer {
   return crypto.pbkdf2Sync(masterPw, salt, ITERATIONS, KEY_LEN, DIGEST);
@@ -28,27 +28,11 @@ export function hashDerivedKey(key: Buffer): string {
 
 /**
  * 平文を暗号化（AES-256-GCM）
+ * @param plain 
+ * @param key 
+ * @returns 
  */
 export function encrypt(plain: string, key: Buffer): string {
-  // =========================
-  // テスト用人工失敗ポイント
-  // TODO:: 削除予定
-  // =========================
-  encryptCounter++;
-
-  // 1件目で即失敗
-  if (process.env.TEST_FAIL === '1') {
-    throw new Error('Forced failure (TEST_FAIL)');
-  }
-
-  // N件目で失敗
-  if (process.env.TEST_FAIL_AT) {
-    const failAt = Number(process.env.TEST_FAIL_AT);
-    if (encryptCounter === failAt) {
-      throw new Error(`Forced failure at ${failAt}`);
-    }
-  }
-
   // =========================
   // 通常暗号処理
   // =========================
@@ -67,6 +51,9 @@ export function encrypt(plain: string, key: Buffer): string {
 
 /**
  * 暗号文を復号
+ * @param cipherText 
+ * @param key 
+ * @returns 
  */
 export function decrypt(cipherText: string, key: Buffer): string {
   const data = Buffer.from(cipherText, 'base64');
